@@ -19,9 +19,10 @@ Widget customListTile({String title, String singer, String cover, onTap}) {
               ),
             ),
             SizedBox(
-              width: 10,
+              width: 13,
             ),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
@@ -32,7 +33,7 @@ Widget customListTile({String title, String singer, String cover, onTap}) {
                 ),
                 Text(
                   singer,
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  style: TextStyle(color: Colors.grey, fontSize: 16,),
                 ),
               ],
             )
