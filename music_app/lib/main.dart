@@ -30,12 +30,12 @@ class MusicApp extends StatefulWidget {
 }
 
 class _MusicAppState extends State<MusicApp> {
-  IconData btnIcon = Icons.play_arrow;
+  IconData btnIcon = Icons.pause;
   List musicList = [];
+  List musicListCopy = [];
   @override
   void initState() {
     super.initState();
-    print("objectddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
     getData();
   }
 
@@ -54,13 +54,28 @@ class _MusicAppState extends State<MusicApp> {
     "Music App",
     style: TextStyle(color: Colors.black),
   );
+  void searchText(String value) {
+    setState(() {
+      int len = value.length;
+      musicList=[];
+      if (value.length == 0) {
+        musicList = musicListCopy;
+      } 
+      else {
+        for(int i=0;i<musicListCopy.length;i++){
+          if(musicListCopy[i]["singer"].toString().substring(0,len).toLowerCase()==value.toLowerCase() || musicListCopy[i]["title"].toString().substring(0,len).toLowerCase()==value.toLowerCase()){
+            musicList.add(musicListCopy[i]);
+          }
+        }
+      }
+    });
+  }
 
   Future getData() async {
     var data = await http.get(Uri.http('akshatshah12.pythonanywhere.com', ""));
-    musicList = jsonDecode(data.body);
     print(musicList);
     setState(() {
-      du = "0:00";
+      musicList = jsonDecode(data.body);
     });
   }
 
@@ -148,7 +163,11 @@ class _MusicAppState extends State<MusicApp> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(onPressed: (){},icon: Icon(Icons.menu),color: Colors.black,),
+        leading: IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.menu),
+          color: Colors.black,
+        ),
         actions: [
           IconButton(
               color: Colors.black,
@@ -156,14 +175,20 @@ class _MusicAppState extends State<MusicApp> {
                 setState(() {
                   if (firstIcon.icon == Icons.search) {
                     firstIcon = Icon(Icons.cancel);
+                    musicListCopy = musicList;
                     firstSearchBar = TextField(
-                      textInputAction: TextInputAction.go,//////check what happens without it
+                      textInputAction: TextInputAction.go,
+                      onChanged: (value) {
+                        searchText(value);
+                      },
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 16,
                       ),
                     );
                   } else {
+                    musicList=musicListCopy;
+                    musicListCopy=[];
                     firstIcon = Icon(Icons.search);
                     firstSearchBar = Text(
                       "Music App",
