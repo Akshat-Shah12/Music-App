@@ -9,7 +9,6 @@ import 'package:music_app/notLoaded.dart';
 import 'package:music_app/playlist.dart';
 import 'package:share/share.dart';
 //import 'package:firebase_core/firebase_core.dart';
-import 'categoriesScroller.dart';
 import 'package:page_transition/page_transition.dart';
 
 void main() {
@@ -38,8 +37,6 @@ class _MusicAppState extends State<MusicApp> {
   IconData btnIcon = Icons.pause;
   List musicList = [];
   List musicListCopy = [];
-  bool _initialized = false;
-  bool _error = false;
   // void initializeFlutterFire() async {
   //   try {
   //     // Wait for Firebase to initialize and set `_initialized` state to true
@@ -66,6 +63,7 @@ class _MusicAppState extends State<MusicApp> {
     });
   }
 
+  String myPlaylist = "My Playlist";
   String english = "English best music";
   String bollywoodMush="Bollywood Mush";
   String partyMusic="Party Music";
@@ -119,7 +117,6 @@ class _MusicAppState extends State<MusicApp> {
     setState(() {
       musicList = jsonDecode(data.body);
       musicListCopy=musicList;
-      print(musicList);
       notLoaded = false;
       appLink = musicList[0]["link"];
     });
@@ -267,7 +264,7 @@ class _MusicAppState extends State<MusicApp> {
       },
     );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -337,7 +334,7 @@ class _MusicAppState extends State<MusicApp> {
                           physics: ClampingScrollPhysics(),
                           scrollDirection: Axis.horizontal,
                           child: Container(
-                            width: 480,
+                            width: 640,
                             margin:
                                 EdgeInsets.only(top: 0, left: 20, right: 20),
                             child: FittedBox(
@@ -349,7 +346,6 @@ class _MusicAppState extends State<MusicApp> {
                                 children: [
                                   InkWell(
                                     onTap: () {
-                                      print("kndkndkdkkkkkkkkkkkkkkkkk");
                                       Navigator.push(context, PageTransition(type: PageTransitionType.topToBottom, child: PlayList(heading:english,data1: musicListCopy,)));
                                     },
                                     child: Container(
@@ -418,6 +414,27 @@ class _MusicAppState extends State<MusicApp> {
                                       //     ),
                                       //   ),
                                       // ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.push(context, PageTransition(type: PageTransitionType.topToBottom, child: PlayList(heading:myPlaylist,data1: musicListCopy,)));
+                                    },
+                                    child: Container(
+                                      width: 200,
+                                      height: 200,
+                                      margin: EdgeInsets.only(right: 10),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        color: Colors.black,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          "My Playlist",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(color: Colors.white, fontSize: 30,fontStyle: FontStyle.italic),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],

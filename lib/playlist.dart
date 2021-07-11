@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:audioplayer/audioplayer.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:page_transition/page_transition.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'custom_list_tiles.dart';
 
 class PlayList extends StatefulWidget {
@@ -23,8 +21,9 @@ class _PlayListState extends State<PlayList> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    checkEmpty();
     data = widget.data1;
-    dataCopy=[];
+    dataCopy = [];
     heading = widget.heading;
     //dataCopy = widget.data1;
     filter(heading);
@@ -34,6 +33,78 @@ class _PlayListState extends State<PlayList> {
     );
   }
 
+
+  //This function is passes is custom_tile using callback function
+  void removeMusicName(String x) async { 
+    setState(() {
+      for(int i=0;i<data.length;i++){
+        if(data[i]["title"]==x){
+          data.remove(data[i]);///or data[i]
+        }
+      }
+      for(int i=0;i<dataCopy.length;i++){
+        if(dataCopy[i]["title"]==x){
+          dataCopy.remove(data[i]);///or data[i]
+        }
+      }
+    });
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String names = pref.getString("singer");
+    int initial = 0;
+    List<String> namesList = List<String>();
+    for (int m = 0; m < names.length; m++) {
+      if (names[m] == "|") {
+        String sub = names.substring(initial, m);
+        if (sub != x) {
+          namesList.add(sub);
+        }
+        initial = m + 1;
+      }
+    }
+    pref.setString("singer", names);
+  }
+
+  //initializing the data with "" if there is no data present
+  void checkEmpty() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String names = pref.getString("singer") ?? "";
+    pref.setString("singer", names);
+  }
+
+  //To get all data from the mobile which is personally stored
+  void getMusicNames() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String names = pref.getString("singer");
+    List<String> namesList = List<String>();
+    int initial = 0;
+    for (int m = 0; m < names.length; m++) {
+      if (names[m] == "|") {
+        namesList.add(names.substring(initial, m));
+        initial = m + 1;
+      }
+    }
+    setState(() {
+      for (int i = 0; i < namesList.length; i++) {
+        for (int j = 0; j < data.length; j++) {
+          if (namesList[i].toString().trim() ==
+              data[j]["title"].toString().trim()) {
+            dataCopy.add(data[j]);
+          }
+        }
+      }
+      data = dataCopy;
+    });
+  }
+
+  //storing the playlist on the phone
+  void setMusicNames(String x) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String names = pref.getString("singer");
+    names = names + x + '|';
+    pref.setString("singer", names);
+  }
+
+  //checking which playlist you have clicked on
   void filter(String type) {
     setState(() {
       if (type == "English best music") {
@@ -42,23 +113,23 @@ class _PlayListState extends State<PlayList> {
             dataCopy.add(data[i]);
           }
         }
-        data=dataCopy;
-      }
-      else if(type=="Party Music"){
+        data = dataCopy;
+      } else if (type == "Party Music") {
         for (int i = 0; i < data.length; i++) {
-          if (data[i]["language"] == "hindi" && data[i]["mush"]=="F") {
+          if (data[i]["language"] == "hindi" && data[i]["mush"] == "F") {
             dataCopy.add(data[i]);
           }
         }
-        data=dataCopy;
-      }
-      else if(type=="Bollywood Mush"){
+        data = dataCopy;
+      } else if (type == "Bollywood Mush") {
         for (int i = 0; i < data.length; i++) {
-          if (data[i]["language"] == "hindi" && data[i]["mush"]=="T") {
+          if (data[i]["language"] == "hindi" && data[i]["mush"] == "T") {
             dataCopy.add(data[i]);
           }
         }
-        data=dataCopy;
+        data = dataCopy;
+      } else if (type == "My Playlist") {
+        getMusicNames();
       }
     });
   }
@@ -217,12 +288,14 @@ class _PlayListState extends State<PlayList> {
         //   color: Colors.black,
         // ),
         title: firstSearchBar,
-        leading: IconButton(icon: Icon(Icons.arrow_back_ios),
-          color: Colors.black,
-          onPressed: (){//Navigator.pop(context,false);
-          Navigator.pop(context, PageTransition(type: PageTransitionType.bottomToTop));
-          }
-        ),
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            color: Colors.black,
+            onPressed: () {
+              //Navigator.pop(context,false);
+              Navigator.pop(context,
+                  PageTransition(type: PageTransitionType.bottomToTop));
+            }),
         actions: [
           IconButton(
               color: Colors.black,
@@ -264,11 +337,19 @@ class _PlayListState extends State<PlayList> {
       body: Container(
         child: Column(
           children: [
+            data.length==0?Container(child: Column(
+              children: [
+                SizedBox(height: 20,),
+                Text("Your playlist is Empty"),
+              ],
+            ),):
             Expanded(
               child: ListView.builder(
                 controller: controller,
                 itemCount: data.length,
                 itemBuilder: (context, index) => customListTile(
+                  elementRemove: removeMusicName,
+                  playList: heading,
                   title: data[index]['title'],
                   singer: "by " + data[index]['singer'],
                   onTap: () {
