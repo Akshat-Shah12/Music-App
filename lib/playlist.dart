@@ -1,6 +1,5 @@
 import 'package:audioplayer/audioplayer.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'custom_list_tiles.dart';
@@ -19,7 +18,6 @@ class PlayList extends StatefulWidget {
 class _PlayListState extends State<PlayList> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkEmpty();
     data = widget.data1;
@@ -51,7 +49,7 @@ class _PlayListState extends State<PlayList> {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String names = pref.getString("singer");
     int initial = 0;
-    List<String> namesList = List<String>();
+    List<String> namesList = <String>[];
     for (int m = 0; m < names.length; m++) {
       if (names[m] == "|") {
         String sub = names.substring(initial, m);
@@ -75,7 +73,7 @@ class _PlayListState extends State<PlayList> {
   void getMusicNames() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String names = pref.getString("singer");
-    List<String> namesList = List<String>();
+    List<String> namesList = <String>[];
     int initial = 0;
     for (int m = 0; m < names.length; m++) {
       if (names[m] == "|") {
@@ -130,6 +128,14 @@ class _PlayListState extends State<PlayList> {
         data = dataCopy;
       } else if (type == "My Playlist") {
         getMusicNames();
+      }
+      else{
+        for (int i = 0; i < data.length; i++) {
+          if (data[i]["movie"] == type ) {
+            dataCopy.add(data[i]);
+          }
+        }
+        data = dataCopy;
       }
     });
   }
@@ -294,7 +300,7 @@ class _PlayListState extends State<PlayList> {
             onPressed: () {
               //Navigator.pop(context,false);
               Navigator.pop(context,
-                  PageTransition(type: PageTransitionType.bottomToTop));
+                  PageTransition(type: PageTransitionType.bottomToTop, child: null));
             }),
         actions: [
           IconButton(
